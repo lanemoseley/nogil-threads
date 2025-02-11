@@ -61,11 +61,49 @@ Execution Time: 2.05 seconds
 Execution Time: 0.60 seconds
 ```
 
-Now let's try `recursive_fibonacci.py`. Calculating Fibonacci sequences recursively is CPU-intensive, but is also inherently single-threaded. We can see that free-threading mode actually performs much worse than regular Python with GIL enabled. This is due to the extra overhead of creating and managing function calls.
+### Fibonacci Sequence (`recursive_fibonacci.py`)
+
+Calculating Fibonacci sequences recursively is CPU-intensive, but is also inherently single-threaded. We can see that free-threading mode actually performs much worse than regular Python with GIL enabled. This is due to the extra overhead of creating and managing function calls.
 
 ```
 ➜  nogil-threads git:(main) ✗ python3 recursive_fibonacci.py
 Execution Time: 0.85 seconds
 ➜  nogil-threads git:(main) ✗ ~/python-nogil/bin/python3 recursive_fibonacci.py
 Execution Time: 11.46 seconds
+```
+
+### Merge Sort (`merge_sort.py`)
+
+Multithreaded merge sort is a more interesting example. Left and right subarrays are processed in parallel using separate threads. Each recursive call spawns new threads to sort subarrays independently before merging the results. Recursion is used with each left and right sub-array being processed by a separate thread. Python's GIL does not allow for true parallelism, which is why in this example free-threading mode consistently outperforms standard Python.
+
+```
+➜  nogil-threads git:(main) ✗ python3 merge_sort.py
+Execution Time: 5.43 seconds
+➜  nogil-threads git:(main) ✗ ~/python-nogil/bin/python3 merge_sort.py
+Execution Time: 2.42 seconds
+```
+
+With the GIL enabled, execution time can vary widely due to thread contention and context switching overhead.
+
+Even though we spawn multiple threads, the GIL forces them to wait for each other since only one thread at a time can execute Python bytecode. The time spent waiting for the GIL varies per run, causing inconsistent results.
+
+```
+➜  nogil-threads git:(main) ✗ python3 merge_sort.py
+Execution Time: 5.43 seconds
+➜  nogil-threads git:(main) ✗ ~/python-nogil/bin/python3 merge_sort.py
+Execution Time: 2.42 seconds
+```
+
+```
+➜  nogil-threads git:(main) ✗ python3 merge_sort.py                   
+Execution Time: 19.39 seconds
+➜  nogil-threads git:(main) ✗ ~/python-nogil/bin/python3 merge_sort.py
+Execution Time: 2.64 seconds
+```
+
+```
+➜  nogil-threads git:(main) ✗ python3 merge_sort.py                   
+Execution Time: 13.56 seconds
+➜  nogil-threads git:(main) ✗ ~/python-nogil/bin/python3 merge_sort.py
+Execution Time: 2.29 seconds
 ```
